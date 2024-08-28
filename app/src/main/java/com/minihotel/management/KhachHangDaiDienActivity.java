@@ -8,16 +8,22 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.minihotel.management.dto.KhachHangRequest;
 import com.minihotel.management.dto.PhieuThuePhongRequest;
 import com.minihotel.management.dto.ResultResponse;
+import com.minihotel.management.managers.calls.CallKhachHangByIdPhieuDat;
 import com.minihotel.management.managers.calls.CallPhieuDatById;
+import com.minihotel.management.managers.calls.CallThemKhachHang;
 import com.minihotel.management.managers.calls.CallThuePhongKhachSan;
 import com.minihotel.management.managers.calls.CallTimKiemKhachHang;
+import com.minihotel.management.managers.interfaces.IKhachHangByIdPhieuDat;
 import com.minihotel.management.managers.interfaces.IPhieuDatById;
+import com.minihotel.management.managers.interfaces.IThemKhachHang;
 import com.minihotel.management.managers.interfaces.IThuePhongKhachSan;
 import com.minihotel.management.managers.interfaces.ITimKiemKhacHang;
 import com.minihotel.management.model.KhachHang;
@@ -44,12 +50,24 @@ public class KhachHangDaiDienActivity extends AppCompatActivity {
         idPhieuDat = getIntent().getIntExtra("idPhieuDat", 0);
         initViews();
         setEvents();
+        setBtnBack();
+    }
+
+    private void setBtnBack(){
+        ImageButton btnBack = findViewById(R.id.imageButton);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         getPhieuDatById();
+        getKhachHangByIdPhieuDat(idPhieuDat);
     }
 
     private void getPhieuDatById(){
@@ -102,6 +120,7 @@ public class KhachHangDaiDienActivity extends AppCompatActivity {
                 if(resultResponse.getCode() == 200){
                     Common.onCreateMessageDialog(KhachHangDaiDienActivity.this,
                             resultResponse.getMessage()).show();
+                    Utils.phongChons.clear();
 //                    startActivity(new Intent(KhachHangDaiDienActivity.this, SoDoActivity.class));
                 }
             }
@@ -131,7 +150,37 @@ public class KhachHangDaiDienActivity extends AppCompatActivity {
         btnThemMoi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(edtCccd.getText().toString().trim().equals("") ||
+                        edtHoTen.getText().toString().trim().equals("") ||
+                        edtEmail.getText().toString().trim().equals("") ||
+                        edtSdt.getText().toString().trim().equals("")){
+                    Common.onCreateMessageDialog(KhachHangDaiDienActivity.this,
+                            "Vui lòng nhập đầy đủ thông tin!").show();
+                }else {
+                    KhachHangRequest khachHangRequest = new KhachHangRequest();
+                    khachHangRequest.setCmnd(edtCccd.getText().toString().trim());
+                    khachHangRequest.setHoTen(edtHoTen.getText().toString().trim());
+                    khachHangRequest.setEmail(edtEmail.getText().toString().trim());
+                    khachHangRequest.setSdt(edtSdt.getText().toString().trim());
+                    if(!edtDiaChi.getText().toString().trim().equals("")) {
+                        khachHangRequest.setDiaChi(edtDiaChi.getText().toString().trim());
+                    }
+                    CallThemKhachHang.themKhachHang(khachHangRequest, new IThemKhachHang() {
+                        @Override
+                        public void onSuccess(KhachHang response) {
+                            khachHang = response;
+                            Common.onCreateMessageDialog(KhachHangDaiDienActivity.this,
+                                    "Thêm khách hàng thành công!").show();
+                        }
 
+                        @Override
+                        public void onError(Throwable t) {
+                            Log.d("TAG-ERR", t.getMessage());
+                            Common.onCreateMessageDialog(KhachHangDaiDienActivity.this,
+                                    "Lỗi thêm khách hàng, vui lòng thử lại!").show();
+                        }
+                    });
+                }
             }
         });
 
@@ -182,5 +231,21 @@ public class KhachHangDaiDienActivity extends AppCompatActivity {
         txtTamUng = findViewById(R.id.txtTamUng);
         btnThemMoi = findViewById(R.id.btnThemMoi);
         btnXacNhan = findViewById(R.id.btnXacNhan);
+    }
+
+    public void getKhachHangByIdPhieuDat(int idPhieuDat){
+        CallKhachHangByIdPhieuDat.getKhachHangByIdPhieuDat(idPhieuDat, new IKhachHangByIdPhieuDat() {
+            @Override
+            public void onSuccess(KhachHang khachHangResponse) {
+                khachHang = khachHangResponse;
+                showDataKhachHang();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Common.onCreateMessageDialog(KhachHangDaiDienActivity.this,
+                        "Phiếu đặt này không tìm thấy khách hàng").show();
+            }
+        });
     }
 }

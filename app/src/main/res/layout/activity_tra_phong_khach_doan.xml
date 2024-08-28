@@ -115,19 +115,11 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rcChiTietPhieuThue"
+            android:id="@+id/rcPhieuThue"
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnXacNhan"
-            style="@android:style/Widget.Button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_blue"
-            android:text="Xác nhận"
-            android:textColor="@color/white" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

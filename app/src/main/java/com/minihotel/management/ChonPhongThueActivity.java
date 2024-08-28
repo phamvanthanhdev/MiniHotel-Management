@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +18,7 @@ import com.minihotel.management.adapter.ChonPhongThueAdapter;
 import com.minihotel.management.adapter.PhongThueAdapter;
 import com.minihotel.management.managers.calls.CallPhieuDatById;
 import com.minihotel.management.managers.interfaces.IPhieuDatById;
+import com.minihotel.management.model.HangPhongDat;
 import com.minihotel.management.model.PhieuDat;
 import com.minihotel.management.model.PhongTrong;
 import com.minihotel.management.utils.Common;
@@ -38,12 +40,39 @@ public class ChonPhongThueActivity extends AppCompatActivity {
         idPhieuDat = getIntent().getIntExtra("idPhieuDat", 0);
         initViews();
         setEvents();
+        setBtnBack();
+    }
+
+    private void setBtnBack(){
+        ImageButton btnBack = findViewById(R.id.imageButton);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+    }
+
+    private int soLuongHangPhongDaDat(){
+        int tongSoLuongPhong = 0;
+        for (HangPhongDat hangPhongDat: Utils.chitietHangPhongsThue) {
+            tongSoLuongPhong += hangPhongDat.getSoLuong();
+        }
+        return tongSoLuongPhong;
     }
 
     private void setEvents() {
         btnTiepTuc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(soLuongHangPhongDaDat() > Utils.phongChons.size()){
+                    Common.onCreateMessageDialog(ChonPhongThueActivity.this,
+                            "Vui lòng chọn đủ số lượng phòng").show();
+                    Toast.makeText(ChonPhongThueActivity.this,
+                            "phong dat " + soLuongHangPhongDaDat() + " phong chon " + Utils.phongChons.size(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Intent intent = new Intent(ChonPhongThueActivity.this, KhachHangDaiDienActivity.class);
                 intent.putExtra("idPhieuDat", idPhieuDat);
                 startActivity(intent);

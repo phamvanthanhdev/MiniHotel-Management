@@ -5,23 +5,34 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.minihotel.management.adapter.HangPhongDatAdapter;
+import com.minihotel.management.adapter.ThongTinHangPhongAdapter;
 import com.minihotel.management.managers.calls.CallChiTiet2sByIdPhieuDat;
 import com.minihotel.management.managers.calls.CallPhieuDatById;
+import com.minihotel.management.managers.calls.CallThongTinHangPhongTheoThoiGian;
 import com.minihotel.management.managers.interfaces.IChiTiet2sByIdPhieuDat;
 import com.minihotel.management.managers.interfaces.IPhieuDatById;
+import com.minihotel.management.managers.interfaces.IThongTinHangPhongTheoThoiGian;
 import com.minihotel.management.model.HangPhongDat;
 import com.minihotel.management.model.PhieuDat;
+import com.minihotel.management.model.ThongTinHangPhong;
 import com.minihotel.management.utils.Common;
 import com.minihotel.management.utils.Utils;
 
@@ -33,8 +44,9 @@ public class ChonHangPhongThueActivity extends AppCompatActivity {
     private int idPhieuDat;
     private RecyclerView rcHangPhongThue;
     private TextInputEditText edtNgayNhanPhong, edtNgayTraPhong;
-    private Button btnTiepTuc;
+    private Button btnTiepTuc, btnChonThem;
     private TextView txtTongTien;
+    private List<ThongTinHangPhong> thongTinHangPhongs;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +55,17 @@ public class ChonHangPhongThueActivity extends AppCompatActivity {
         idPhieuDat = getIntent().getIntExtra("idPhieuDat", 0);
         initViews();
         setEvents();
+        setBtnBack();
+    }
+
+    private void setBtnBack(){
+        ImageButton btnBack = findViewById(R.id.imageButton);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     private void setEvents() {
@@ -65,6 +88,13 @@ public class ChonHangPhongThueActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        btnChonThem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openDialogChonHangPhong();
+            }
+        });
     }
 
     private void showData() {
@@ -80,15 +110,18 @@ public class ChonHangPhongThueActivity extends AppCompatActivity {
         edtNgayTraPhong = findViewById(R.id.edtNgayTraPhong);
         btnTiepTuc = findViewById(R.id.btnTiepTuc);
         txtTongTien = findViewById(R.id.txtTongTien);
+        btnChonThem = findViewById(R.id.btnChonThem);
     }
 
     private void showDataTongTien(){
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            LocalDate ngayDen = LocalDate.parse(phieuDat.getNgayBatDau());
-            LocalDate ngayDi = LocalDate.parse(phieuDat.getNgayTraPhong());
-            txtTongTien.setText(Common.convertCurrencyVietnamese(
-                    Utils.getTongTienHangPhongsThue(ngayDen, ngayDi)
-            ) + " VNĐ");
+        if(phieuDat != null) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                LocalDate ngayDen = LocalDate.parse(phieuDat.getNgayBatDau());
+                LocalDate ngayDi = LocalDate.parse(phieuDat.getNgayTraPhong());
+                txtTongTien.setText(Common.convertCurrencyVietnamese(
+                        Utils.getTongTienHangPhongsThue(ngayDen, ngayDi)
+                ) + " VNĐ");
+            }
         }
     }
 
@@ -105,6 +138,7 @@ public class ChonHangPhongThueActivity extends AppCompatActivity {
             public void onSuccess(PhieuDat phieuDatResponse) {
                 phieuDat = phieuDatResponse;
                 showData();
+                showDataTongTien();
             }
 
             @Override
@@ -120,7 +154,7 @@ public class ChonHangPhongThueActivity extends AppCompatActivity {
             @Override
             public void onSuccess(List<HangPhongDat> responses) {
                 Utils.chitietHangPhongsThue = responses;
-                setHangPhongRecycler();
+                setHangPhongDaDatRecycler();
                 showDataTongTien();
             }
 
@@ -131,7 +165,7 @@ public class ChonHangPhongThueActivity extends AppCompatActivity {
         });
     }
 
-    private void setHangPhongRecycler(){
+    private void setHangPhongDaDatRecycler(){
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
         rcHangPhongThue.setLayoutManager(layoutManager);
         HangPhongDatAdapter adapter = new HangPhongDatAdapter(this, Utils.chitietHangPhongsThue);
@@ -162,5 +196,71 @@ public class ChonHangPhongThueActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+
+    private void openDialogChonHangPhong(){
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_chon_thongtin_hangphong);
+
+        Window window = dialog.getWindow();
+        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        WindowManager.LayoutParams windownAttributes = window.getAttributes();
+        windownAttributes.gravity = Gravity.CENTER;
+        window.setAttributes(windownAttributes);
+
+        dialog.setCancelable(true);
+
+        RecyclerView rcThongTinHangPhong = dialog.findViewById(R.id.rcThongTinHangPhong);
+        getThongTinHangPhongThoiGian(rcThongTinHangPhong);
+
+
+        dialog.show();
+    }
+
+    private void getThongTinHangPhongThoiGian(RecyclerView rcThongTinHangPhong){
+        CallThongTinHangPhongTheoThoiGian.getThongTinHangPhongTheoThoiGian(phieuDat.getNgayBatDau(), phieuDat.getNgayTraPhong(), new IThongTinHangPhongTheoThoiGian() {
+            @Override
+            public void onSuccess(List<ThongTinHangPhong> responses) {
+                thongTinHangPhongs = responses;
+                setHangPhongThoiGianRecycler(rcThongTinHangPhong);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Log.d("TAG-ERR", t.getMessage());
+            }
+        });
+    }
+
+    private void setHangPhongThoiGianRecycler(RecyclerView rcThongTinHangPhong){
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false);
+        rcThongTinHangPhong.setLayoutManager(layoutManager);
+        ThongTinHangPhongAdapter adapter = new ThongTinHangPhongAdapter(this, thongTinHangPhongs);
+        rcThongTinHangPhong.setAdapter(adapter);
+        adapter.setOnButtonThemClickListener(new ThongTinHangPhongAdapter.OnButtonThemClickListener() {
+            @Override
+            public void onClick(int position, int idHangPhong) {
+                if(thongTinHangPhongs.get(position).getSoLuongTrong() > 0) {
+                    long donGia = 0;
+                    if(thongTinHangPhongs.get(position).getGiaKhuyenMai() > 0)
+                        donGia = thongTinHangPhongs.get(position).getGiaKhuyenMai();
+                    else
+                        donGia = thongTinHangPhongs.get(position).getGiaGoc();
+                    Utils.themHangPhongThue(thongTinHangPhongs.get(position).getIdHangPhong(),
+                            thongTinHangPhongs.get(position).getTenHangPhong(),
+                            donGia, thongTinHangPhongs.get(position).getSoLuongTrong()
+                            );
+                    setHangPhongDaDatRecycler();
+                    showDataTongTien();
+                }else{
+                    Common.onCreateMessageDialog(ChonHangPhongThueActivity.this,
+                            "Hạng phòng hiện không đủ phòng").show();
+                }
+            }
+        });
     }
 }

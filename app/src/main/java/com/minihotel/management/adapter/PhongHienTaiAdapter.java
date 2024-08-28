@@ -2,6 +2,7 @@ package com.minihotel.management.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +49,7 @@ public class PhongHienTaiAdapter extends RecyclerView.Adapter<PhongHienTaiAdapte
         PhongHienTai item = items.get(position);
         holder.txtTenPhong.setText(item.getMaPhong());
         holder.txtTenHangPhong.setText(item.getTenHangPhong());
-        if(item.getGiaKhuyenMai() == 0){
+        if(item.getGiaKhuyenMai() <= 0){
             holder.txtGiaPhong.setText(Common.convertCurrencyVietnamese(item.getGiaGoc()) + " VNĐ");
         }else{
             holder.txtGiaPhong.setText(Common.convertCurrencyVietnamese(item.getGiaKhuyenMai()) + " VNĐ");
@@ -78,8 +79,17 @@ public class PhongHienTaiAdapter extends RecyclerView.Adapter<PhongHienTaiAdapte
             }
         }
 
+        if(item.getDaThue()){
+            holder.txtTrangThai.setVisibility(View.INVISIBLE);
+        }else{
+            holder.txtTrangThai.setVisibility(View.VISIBLE);
+        }
+
+
         holder.itemView.setOnClickListener(view ->
-                onItemClickListener.onClick(item.getMaPhong(), item.getIdChiTietPhieuThue(), holder.itemView));
+                onItemClickListener.onClick(item.getMaPhong(), item.getIdHangPhong(),
+                        item.getGiaKhuyenMai() <= 0 ? item.getGiaGoc() : item.getGiaKhuyenMai(),
+                        item.getIdChiTietPhieuThue(), item.getTenTrangThai(), holder.itemView, holder.layout));
 
     }
 
@@ -109,6 +119,6 @@ public class PhongHienTaiAdapter extends RecyclerView.Adapter<PhongHienTaiAdapte
     }
 
     public interface OnItemClickListener {
-        void onClick(String maPhong, Integer idChiTietPhieuThue, View view);
+        void onClick(String maPhong, int idHangPhong, Long giaPhong, Integer idChiTietPhieuThue,String trangThai, View view, LinearLayout linearLayout);
     }
 }

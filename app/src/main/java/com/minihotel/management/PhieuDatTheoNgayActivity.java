@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -19,7 +20,9 @@ import com.minihotel.management.adapter.ChiTietSuDungDichVuAdapter;
 import com.minihotel.management.adapter.PhieuDatTheoNgayAdapter;
 import com.minihotel.management.dto.ChiTietSuDungDichVuRequest;
 import com.minihotel.management.managers.calls.CallPhieuDatTheoNgay;
+import com.minihotel.management.managers.calls.CallPhieuDatTheoThoiGian;
 import com.minihotel.management.managers.interfaces.IPhieuDatTheoNgay;
+import com.minihotel.management.managers.interfaces.IPhieuDatTheoThoiGian;
 import com.minihotel.management.model.PhieuDatTheoNgay;
 import com.minihotel.management.utils.Common;
 import com.minihotel.management.utils.Utils;
@@ -30,33 +33,44 @@ import java.util.List;
 import java.util.Locale;
 
 public class PhieuDatTheoNgayActivity extends AppCompatActivity {
-    private TextInputEditText edtNgay;
+    private TextInputEditText edtNgayBatDau, edtNgayKetThuc;
     private RecyclerView rcPhieuDatTheoNgay;
-    private Button btnTimKiem;
     private List<PhieuDatTheoNgay> phieuDatTheoNgays;
-    private LocalDate ngay = Common.getCurrentDate();
+    private LocalDate ngayBatDauTim = Common.getCurrentDate();
+    private LocalDate ngayKetThucTim = Common.getPlusDayCurrentDate();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_phieu_dat_theo_ngay);
 
         initViews();
-        edtNgay.setText(Common.fommatDateShow(ngay));
+        edtNgayBatDau.setText(Common.fommatDateShow(ngayBatDauTim));
+        edtNgayKetThuc.setText(Common.fommatDateShow(ngayKetThucTim));
         setEvents();
+        setBtnBack();
     }
 
-    private void setEvents() {
-        edtNgay.setOnClickListener(new View.OnClickListener() {
+    private void setBtnBack(){
+        ImageButton btnBack = findViewById(R.id.imageButton);
+        btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pickDate(edtNgay);
+                finish();
+            }
+        });
+    }
+    private void setEvents() {
+        edtNgayBatDau.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickDateBatDau();
             }
         });
 
-        btnTimKiem.setOnClickListener(new View.OnClickListener() {
+        edtNgayKetThuc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getPhieuDatTheoNgay();
+                pickDateKetThuc();
             }
         });
     }
@@ -64,17 +78,33 @@ public class PhieuDatTheoNgayActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        getPhieuDatTheoNgay();
+        getPhieuDatTheoThoiGian(ngayBatDauTim, ngayKetThucTim);
     }
 
     private void initViews() {
         rcPhieuDatTheoNgay = findViewById(R.id.rcPhieuDatTheoNgay);
-        edtNgay = findViewById(R.id.edtNgay);
-        btnTimKiem = findViewById(R.id.btnTimKiem);
+        edtNgayBatDau = findViewById(R.id.edtNgayBatDau);
+        edtNgayKetThuc = findViewById(R.id.edtNgayKetThuc);
     }
 
-    private void getPhieuDatTheoNgay(){
+    /*private void getPhieuDatTheoNgay(){
         CallPhieuDatTheoNgay.getPhieuDatTheoNgay(Common.fommatDateRequest(ngay), new IPhieuDatTheoNgay() {
+            @Override
+            public void onSuccess(List<PhieuDatTheoNgay> responses) {
+                phieuDatTheoNgays = responses;
+                setPhieuDatTheoNgayRecycler();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Log.d("TAG-ERR", t.getMessage());
+            }
+        });
+    }*/
+
+    private void getPhieuDatTheoThoiGian(LocalDate ngayBatDauTim, LocalDate ngayKetThucTim){
+        CallPhieuDatTheoThoiGian.getPhieuDatTheoThoiGian(Common.fommatDateRequest(ngayBatDauTim),
+                Common.fommatDateRequest(ngayKetThucTim), new IPhieuDatTheoThoiGian() {
             @Override
             public void onSuccess(List<PhieuDatTheoNgay> responses) {
                 phieuDatTheoNgays = responses;
@@ -104,19 +134,37 @@ public class PhieuDatTheoNgayActivity extends AppCompatActivity {
     }
 
     @SuppressLint("NewApi")
-    public void pickDate(TextInputEditText edt){
-        Calendar calendar = Calendar.getInstance();
-        int ngayHienTai = calendar.get(Calendar.DAY_OF_MONTH);
-        int thangHienTai = calendar.get(Calendar.MONTH);
-        int namHienTai = calendar.get(Calendar.YEAR);
+    public void pickDateBatDau(){
+        int ngayHienTai = ngayBatDauTim.getDayOfMonth();
+        int thangHienTai = ngayBatDauTim.getMonthValue();
+        int namHienTai = ngayBatDauTim.getYear();
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(PhieuDatTheoNgayActivity.this, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                calendar.set(year,month, dayOfMonth);
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    ngay = LocalDate.of(year, month + 1, dayOfMonth);
-                    edtNgay.setText(Common.fommatDateShow(ngay));
+                    ngayBatDauTim = LocalDate.of(year, month, dayOfMonth);
+                    edtNgayBatDau.setText(Common.fommatDateShow(ngayBatDauTim));
+                    getPhieuDatTheoThoiGian(ngayBatDauTim, ngayKetThucTim);
+                }
+            }
+        }, namHienTai, thangHienTai, ngayHienTai);
+        datePickerDialog.show();
+    }
+
+    @SuppressLint("NewApi")
+    public void pickDateKetThuc(){
+        int ngayHienTai = ngayKetThucTim.getDayOfMonth();
+        int thangHienTai = ngayKetThucTim.getMonthValue();
+        int namHienTai = ngayKetThucTim.getYear();
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(PhieuDatTheoNgayActivity.this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    ngayKetThucTim = LocalDate.of(year, month, dayOfMonth);
+                    edtNgayKetThuc.setText(Common.fommatDateShow(ngayKetThucTim));
+                    getPhieuDatTheoThoiGian(ngayBatDauTim, ngayKetThucTim);
                 }
             }
         }, namHienTai, thangHienTai, ngayHienTai);

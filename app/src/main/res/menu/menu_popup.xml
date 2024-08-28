@@ -4,4 +4,10 @@
         android:title="Chi tiết"/>
     <item android:id="@+id/menuTrangThai"
         android:title="Trạng thái"/>
+
+    <item android:id="@+id/menuThueNhanh"
+        android:title="Thuê nhanh"/>
+
+    <item android:id="@+id/menuDoiPhong"
+        android:title="Đổi phòng"/>
 </menu>

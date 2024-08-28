@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 
 import com.minihotel.management.adapter.PhongTrongAdapter;
 import com.minihotel.management.model.PhongTrong;
@@ -23,6 +24,17 @@ public class PhongTrongActivity extends AppCompatActivity {
         setContentView(R.layout.activity_phong_trong);
 
         initViews();
+        setBtnBack();
+    }
+
+    private void setBtnBack(){
+        ImageButton btnBack = findViewById(R.id.imageButton);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     private void initViews() {

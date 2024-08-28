@@ -18,6 +18,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,6 +78,17 @@ public class ChiTietPhieuThueActivity extends AppCompatActivity {
         idChiTietPhieuThue = getIntent().getIntExtra("idChiTietPhieuThue", 0);
         initViews();
         setEvents();
+        setBtnBack();
+    }
+
+    private void setBtnBack(){
+        ImageButton btnBack = findViewById(R.id.imageButton);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     private void setEvents() {

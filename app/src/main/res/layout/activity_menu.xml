@@ -136,7 +136,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/baseline_chrome_reader_mode_50" />
+                    app:srcCompat="@drawable/baseline_check_circle_outline_50_blue" />
 
                 <TextView
                     android:id="@+id/textView8"
@@ -163,12 +163,58 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1">
 
+                <ImageButton
+                    android:id="@+id/btnHoaDonNgay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/bg_trong_suot"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/baseline_topic_50" />
+
+                <TextView
+                    android:id="@+id/textView19"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hóa đơn ngày"
+                    android:textSize="18sp"
+                    android:textColor="@color/blue2"
+                    app:layout_constraintEnd_toEndOf="@+id/btnHoaDonNgay"
+                    app:layout_constraintStart_toStartOf="@+id/btnHoaDonNgay"
+                    app:layout_constraintTop_toBottomOf="@+id/btnHoaDonNgay" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/btnDoanhThu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/bg_trong_suot"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/baseline_money_50" />
+
+                <TextView
+                    android:id="@+id/textView20"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Doanh thu"
+                    android:textSize="18sp"
+                    android:textColor="@color/blue2"
+                    app:layout_constraintEnd_toEndOf="@+id/btnDoanhThu"
+                    app:layout_constraintStart_toStartOf="@+id/btnDoanhThu"
+                    app:layout_constraintTop_toBottomOf="@+id/btnDoanhThu" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
@@ -184,12 +230,59 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1">
 
+                <ImageButton
+                    android:id="@+id/btnKhachLuuTru"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/bg_trong_suot"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/baseline_account_circle_50" />
+
+                <TextView
+                    android:id="@+id/textView21"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Khách lưu trú"
+                    android:textSize="18sp"
+                    android:textColor="@color/blue2"
+                    app:layout_constraintEnd_toEndOf="@+id/btnKhachLuuTru"
+                    app:layout_constraintStart_toStartOf="@+id/btnKhachLuuTru"
+                    app:layout_constraintTop_toBottomOf="@+id/btnKhachLuuTru" />
+
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/btnDangXuat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/bg_trong_suot"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/baseline_call_missed_outgoing_50" />
+
+                <TextView
+                    android:id="@+id/textView22"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Thoát"
+                    android:textSize="18sp"
+                    android:textColor="@color/blue2"
+                    app:layout_constraintEnd_toEndOf="@+id/btnDangXuat"
+                    app:layout_constraintStart_toStartOf="@+id/btnDangXuat"
+                    app:layout_constraintTop_toBottomOf="@+id/btnDangXuat" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>

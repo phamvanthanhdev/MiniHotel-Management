@@ -5,6 +5,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +21,9 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
@@ -32,14 +36,18 @@ import com.minihotel.management.dto.ChiTietSuDungDichVuRequest;
 import com.minihotel.management.dto.ResultResponse;
 import com.minihotel.management.managers.calls.CallCapNhatTrangThaiPhong;
 import com.minihotel.management.managers.calls.CallGetAllTrangThai;
+import com.minihotel.management.managers.calls.CallKiemTraPhongThue;
 import com.minihotel.management.managers.calls.CallPhongsHienTai;
 import com.minihotel.management.managers.interfaces.ICapNhatTrangThaiPhong;
 import com.minihotel.management.managers.interfaces.IGetAllTrangThai;
+import com.minihotel.management.managers.interfaces.IKiemTraPhongThue;
 import com.minihotel.management.managers.interfaces.IPhongsHienTai;
 import com.minihotel.management.model.PhongHienTai;
 import com.minihotel.management.model.TrangThai;
 import com.minihotel.management.utils.Common;
 
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.List;
 
 public class SoDoActivity extends AppCompatActivity {
@@ -54,6 +62,17 @@ public class SoDoActivity extends AppCompatActivity {
 
         initViews();
         setEvents();
+        setBtnBack();
+    }
+
+    private void setBtnBack(){
+        ImageButton btnBack = findViewById(R.id.imageButton);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     private void setEvents() {
@@ -99,14 +118,14 @@ public class SoDoActivity extends AppCompatActivity {
         rcPhongHienTai.setAdapter(adapter);
         adapter.setOnItemClickListener(new PhongHienTaiAdapter.OnItemClickListener() {
             @Override
-            public void onClick(String maPhong, Integer idChiTietPhieuThue, View view) {
-                showPopupMenu(maPhong, idChiTietPhieuThue, view);
+            public void onClick(String maPhong, int idHangPhong, Long giaPhong, Integer idChiTietPhieuThue, String trangThai, View view, LinearLayout layout) {
+                showPopupMenu(maPhong, idHangPhong, giaPhong, idChiTietPhieuThue, trangThai, view);
             }
         });
 
     }
 
-    private void showPopupMenu(String maPhong, Integer idChiTietPhieuThue, View view) {
+    private void showPopupMenu(String maPhong, int idHangPhong, Long giaPhong, Integer idChiTietPhieuThue, String trangThai, View view) {
         PopupMenu popupMenu = new PopupMenu(this, view);
         MenuInflater inflater = popupMenu.getMenuInflater();
         inflater.inflate(R.menu.menu_popup, popupMenu.getMenu());
@@ -114,13 +133,13 @@ public class SoDoActivity extends AppCompatActivity {
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                return onPopupMenuClick(maPhong, idChiTietPhieuThue, item);
+                return onPopupMenuClick(maPhong,idHangPhong, giaPhong, idChiTietPhieuThue, trangThai, item);
             }
         });
         popupMenu.show();
     }
 
-    private boolean onPopupMenuClick(String maPhong, Integer idChiTietPhieuThue, MenuItem item){
+    private boolean onPopupMenuClick(String maPhong, int idHangPhong, Long giaPhong, Integer idChiTietPhieuThue, String trangThai, MenuItem item){
         if(item.getItemId() == R.id.menuChiTiet){
             if(idChiTietPhieuThue != null){
                 Intent intent = new Intent(SoDoActivity.this, ChiTietPhieuThueActivity.class);
@@ -130,6 +149,29 @@ public class SoDoActivity extends AppCompatActivity {
         }
         if(item.getItemId() == R.id.menuTrangThai){
             openDialogChonTrangThai(maPhong);
+        }
+
+        if(item.getItemId() == R.id.menuThueNhanh){
+            if(idChiTietPhieuThue == null) {
+                if (trangThai.trim().equals("Sạch sẽ")) {
+                    openDialogChonThoiGian(maPhong, idHangPhong, giaPhong);
+                } else {
+                    Common.onCreateMessageDialog(SoDoActivity.this,
+                            "Trạng thái phòng không sẵn sàng để thuê!").show();
+                }
+            }else{
+                Common.onCreateMessageDialog(SoDoActivity.this,
+                        "Phòng này đang được thuê. Không thể chọn!").show();
+            }
+        }
+
+        if(item.getItemId() == R.id.menuDoiPhong){
+            if(idChiTietPhieuThue != null) {
+                Intent intent = new Intent(SoDoActivity.this, DoiPhongActivity.class);
+                intent.putExtra("idChiTietPhieuThue", idChiTietPhieuThue);
+                intent.putExtra("maPhong", maPhong);
+                startActivity(intent);
+            }
         }
 
         return true;
@@ -199,5 +241,91 @@ public class SoDoActivity extends AppCompatActivity {
                 Log.d("AAA", t.getMessage());
             }
         });
+    }
+
+    private LocalDate ngayDi = Common.getPlusDayCurrentDate();
+    private void openDialogChonThoiGian(String maPhong, int idHangPhong, Long giaPhong){
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_chon_thoi_gian);
+
+        Window window = dialog.getWindow();
+        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        WindowManager.LayoutParams windownAttributes = window.getAttributes();
+        windownAttributes.gravity = Gravity.CENTER;
+        window.setAttributes(windownAttributes);
+
+        dialog.setCancelable(true);
+
+        TextInputEditText edtNgayDen = dialog.findViewById(R.id.edtNgayDen);
+        TextInputEditText edtNgayDi = dialog.findViewById(R.id.edtNgayDi);
+        LocalDate ngayDen = Common.getCurrentDate();
+        edtNgayDen.setText(Common.fommatDateShow(ngayDen));
+        edtNgayDi.setText(Common.fommatDateShow(ngayDi));
+        Button btnKiemTra = dialog.findViewById(R.id.btnKiemTra);
+        edtNgayDi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickDate(edtNgayDi);
+            }
+        });
+        btnKiemTra.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                kiemTraHangPhongThue(idHangPhong, maPhong, giaPhong, ngayDen, ngayDi);
+            }
+        });
+
+        dialog.show();
+    }
+
+    public void kiemTraHangPhongThue(int idHangPhong, String maPhong, Long giaPhong, LocalDate ngayDen, LocalDate ngayDi){
+        CallKiemTraPhongThue.kiemTraPhongThue(
+            idHangPhong,
+            Common.fommatDateRequest(ngayDen),
+            Common.fommatDateRequest(ngayDi),
+            new IKiemTraPhongThue() {
+                @Override
+                public void onSuccess(ResultResponse resultResponse) {
+                    if (resultResponse.getCode() == 200) {
+                        Intent intent = new Intent(SoDoActivity.this, ThuePhongNhanhActivity.class);
+                        intent.putExtra("maPhong", maPhong);
+                        intent.putExtra("idHangPhong", idHangPhong);
+                        intent.putExtra("donGia", giaPhong);
+                        intent.putExtra("ngayDi", Common.fommatDateRequest(ngayDi));
+                        startActivity(intent);
+                    } else {
+                        Common.onCreateMessageDialog(SoDoActivity.this,
+                                "Số lượng phòng không đủ để thuê thêm!").show();
+                    }
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    Log.d("TAG-ERR", t.getMessage());
+                }
+            });
+    }
+
+    @SuppressLint("NewApi")
+    public void pickDate(TextInputEditText edt){
+        Calendar calendar = Calendar.getInstance();
+        int ngay = calendar.get(Calendar.DAY_OF_MONTH);
+        int thang = calendar.get(Calendar.MONTH);
+        int nam = calendar.get(Calendar.YEAR);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(SoDoActivity.this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                calendar.set(year,month, dayOfMonth);
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    LocalDate chooseDate = LocalDate.of(year, month + 1, dayOfMonth);
+                    ngayDi = chooseDate;
+                    edt.setText(Common.fommatDateShow(chooseDate));
+                }
+            }
+        }, nam, thang, ngay);
+        datePickerDialog.show();
     }
 }

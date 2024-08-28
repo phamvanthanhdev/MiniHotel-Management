@@ -5,15 +5,17 @@ import com.minihotel.management.managers.interfaces.IPhieuThueByCmnd;
 import com.minihotel.management.managers.interfaces.IPhieuThueById;
 import com.minihotel.management.model.PhieuThue;
 
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CallPhieuThueByCmnd {
     public static void getPhieuThueByCmnd(String cmnd, IPhieuThueByCmnd callback){
-        ApiService.apiService.getPhieuThueByCmnd(cmnd).enqueue(new Callback<PhieuThue>() {
+        ApiService.apiService.getPhieuThueByCmnd(cmnd).enqueue(new Callback<List<PhieuThue>>() {
             @Override
-            public void onResponse(Call<PhieuThue> call, Response<PhieuThue> response) {
+            public void onResponse(Call<List<PhieuThue>> call, Response<List<PhieuThue>> response) {
                 if(response.isSuccessful())
                     callback.onSuccess(response.body());
                 else
@@ -21,7 +23,7 @@ public class CallPhieuThueByCmnd {
             }
 
             @Override
-            public void onFailure(Call<PhieuThue> call, Throwable throwable) {
+            public void onFailure(Call<List<PhieuThue>> call, Throwable throwable) {
                 callback.onError(throwable);
             }
         });

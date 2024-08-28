@@ -45,7 +45,7 @@ public class PhieuDatTheoNgayAdapter extends RecyclerView.Adapter<PhieuDatTheoNg
     @Override
     public void onBindViewHolder(@NonNull RecentsViewHolder holder, int position) {
         holder.txtTenKhachHang.setText(items.get(position).getTenKhachHang());
-        holder.txtCmnd.setText("Cmnd: " + items.get(position).getCmnd());
+        holder.txtCmnd.setText(items.get(position).getCmnd());
         holder.txtIdPhieuDat.setText(items.get(position).getIdPhieuDat()+"");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             holder.txtNgayDen.setText(Common.fommatDateShow(LocalDate.parse(items.get(position).getNgayBatDau())));

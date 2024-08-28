@@ -13,12 +13,25 @@ public class Utils {
 //    public static int idPhieuDat;
     public static int idNhanVien = 1;
     public static List<HangPhongDat> chitietHangPhongsThue = new ArrayList<>();
-    public static List<ChiTietRequest> phongChons = new ArrayList<>(); // Chọn phòng để thuê
+    public static List<ChiTietRequest> phongChons = new ArrayList<>(); // Chọn phòng để thuê (đã có phiếu đặt)
+    public static List<ChiTietRequest> chiTietRequests = new ArrayList<>(); // Chọn phòng để thuê (chưa có phiếu đặt)
 
     public static PhongChon convertPhongTrongToPhongChon(PhongTrong phongTrong, LocalDate ngayDenThue, LocalDate ngayDiThue){
         return new PhongChon(phongTrong.getMaPhong(), phongTrong.getIdHangPhong(),
                 phongTrong.getDonGia(), ngayDenThue, ngayDiThue);
     }
+
+    public static void themHangPhongThue(Integer idHangPhong, String tenHangPhong, Long donGia, Integer soLuongTrong){
+        for (HangPhongDat chiTiet: chitietHangPhongsThue) {
+            if(chiTiet.getIdHangPhong() == idHangPhong){
+                chiTiet.setSoLuong(chiTiet.getSoLuong() + 1);
+                return;
+            }
+        }
+        HangPhongDat hangPhongDat = new HangPhongDat(1, idHangPhong, tenHangPhong, donGia, soLuongTrong);
+        Utils.chitietHangPhongsThue.add(hangPhongDat);
+    }
+
     public static void tangSoLuongHangPhong(int idHangPhong){
         for (HangPhongDat chiTiet: chitietHangPhongsThue) {
             if(chiTiet.getIdHangPhong() == idHangPhong){
